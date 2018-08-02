@@ -1,1 +1,1 @@
-Open Set Classification
+Framework used : Tensorflow, Keras
