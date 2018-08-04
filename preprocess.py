@@ -57,12 +57,10 @@ def input(eval_data, perform_shuffle):
 
 	num_epochs = FLAGS.num_epochs if not eval_data else None
 	data = dataset.get_dataset(eval_data,FLAGS.batch_size, num_epochs, perform_shuffle)
-	
 	# Create an iterator over the dataset
-    iterator = dataset.make_one_shot_iterator()
-    images, labels = iterator.get_next()
-    labels = tf.reshape(labels, [-1])  # Make sure labels is a 1-D tensor
-
+	iterator = dataset.make_one_shot_iterator()
+	images, labels = iterator.get_next()
+	labels = tf.reshape(labels, [-1])  # Make sure labels is a 1-D tensor
 	return images,labels
 
 
