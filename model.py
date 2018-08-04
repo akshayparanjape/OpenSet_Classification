@@ -220,3 +220,36 @@ class Cifar10_Conv_pool:
         return logits
 
 
+class Cifar10_Conv_pool_norm:
+    def __init__(self, num_classes, wdecay_conv, wdecay_full):
+        self.wd_conv = wdecay_conv
+        self.wd_full = wdecay_full
+        self.num_classes = num_classes
+
+    def __call__(self, images, eval_data):
+        conv1 = conv_layer_norm('conv1', images, is_training=not eval_data,
+                                shape=[3, 3, 3, 64], strides=[1, 1, 1, 1],
+                                padding='SAME', stddev=0.04, bias_init=0.0,
+                                wd=self.wd_conv)
+        pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
+                               padding='SAME', name='pool1')
+
+        conv2 = conv_layer_norm('conv2', pool1, is_training=not eval_data,
+                                shape=[3, 3, 64, 64], strides=[1, 1, 1, 1],
+                                padding='SAME', stddev=0.04, bias_init=0.1,
+                                wd=self.wd_conv)
+        pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],
+                               padding='SAME', name='pool2')
+
+
+        shape_conv = pool2.get_shape().as_list()
+        dim = shape_conv[1] * shape_conv[2] * shape_conv[3]
+        reshape = tf.reshape(pool2, [-1, dim])
+        logits = linear_layer('logits', reshape, [dim, self.num_classes],
+                              stddev=0.04, bias_init=0.1,
+                              wd=self.wd_full)
+
+        return logits
+
+# using larger strides
+        
